@@ -1,0 +1,42 @@
+# 高考志愿智能填报推荐系统 Docker 配置
+# 生产/离线配置 - 只使用 image，不使用 build
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gk-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: gaokao_system
+      MYSQL_USER: gaokao
+      MYSQL_PASSWORD: gaokao123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tomcat:
+    image: tomcat:9-jdk11
+    container_name: gk-tomcat
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: gaokao_system
+      DB_USER: root
+      DB_PASSWORD: 123456
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

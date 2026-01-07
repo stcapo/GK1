@@ -1,0 +1,10 @@
+# 本地开发配置 - 只使用 build，不使用 image
+# 使用: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  tomcat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 覆盖生产配置的volume mount，dev模式使用Docker内置的WAR
+    volumes: []
